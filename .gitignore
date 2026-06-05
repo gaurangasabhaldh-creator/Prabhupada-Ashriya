@@ -12,9 +12,9 @@ ios/Pods/
 .env.production
 .env.local
 
-# Firebase native config — contains API keys, add to repo carefully
-# android/app/google-services.json
-# ios/PrabhupadAshraya/GoogleService-Info.plist
+# Firebase native config — stored as GitHub Secret, injected at build time
+android/app/google-services.json
+ios/PrabhupadAshraya/GoogleService-Info.plist
 
 # React Native
 .metro-health-check*
@@ -30,6 +30,10 @@ ios/Pods/
 
 # Test coverage
 coverage/
+
+# Keystores — generated at build time by CI
+android/app/release.keystore
+android/app/debug.keystore
 
 # Typescript
 *.tsbuildinfo
