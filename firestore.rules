@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ────────────────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && userDoc().role == 'admin';
+    }
+
+    function isTeamLeader() {
+      return isAuthenticated() && userDoc().role in ['admin', 'team_leader'];
+    }
+
+    function isMember() {
+      return isAuthenticated() && userDoc().role in ['admin', 'team_leader', 'volunteer'];
+    }
+
+    function sameOrg(orgId) {
+      return isAuthenticated() && userDoc().organizationId == orgId;
+    }
+
+    function inTeam(teamId) {
+      return isAuthenticated() && (
+        userDoc().role == 'admin' ||
+        teamId in userDoc().teamIds
+      );
+    }
+
+    // ─── Users ────────────────────────────────────────────────────────────────
+
+    match /users/{uid} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == uid ||
+        sameOrg(resource.data.organizationId)
+      );
+      allow create: if isAdmin();
+      allow update: if isAuthenticated() && (
+        request.auth.uid == uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ─── Teams ────────────────────────────────────────────────────────────────
+
+    match /teams/{teamId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Devotees ─────────────────────────────────────────────────────────────
+
+    match /devotees/{devoteeId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isTeamLeader() && sameOrg(request.resource.data.organizationId);
+      allow update: if isTeamLeader() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Attendance Sessions ──────────────────────────────────────────────────
+
+    match /attendanceSessions/{sessionId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isMember() && sameOrg(request.resource.data.organizationId);
+      allow update: if isMember() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Attendance Records ───────────────────────────────────────────────────
+
+    match /attendanceRecords/{recordId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isMember() && sameOrg(request.resource.data.organizationId);
+      allow update: if isMember() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── New Comers ───────────────────────────────────────────────────────────
+
+    match /newComers/{newcomerId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isMember() && sameOrg(request.resource.data.organizationId);
+      allow update: if isTeamLeader() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Calling Lists ────────────────────────────────────────────────────────
+
+    match /callingLists/{listId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isTeamLeader() && sameOrg(request.resource.data.organizationId);
+      allow update: if isMember() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Call Records ─────────────────────────────────────────────────────────
+
+    match /callRecords/{recordId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isTeamLeader() && sameOrg(request.resource.data.organizationId);
+      allow update: if isMember() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Follow-Ups ───────────────────────────────────────────────────────────
+
+    match /followUps/{followUpId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isTeamLeader() && sameOrg(request.resource.data.organizationId);
+      allow update: if isTeamLeader() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Care Cases ───────────────────────────────────────────────────────────
+
+    match /careCases/{caseId} {
+      allow read: if isMember() && sameOrg(resource.data.organizationId);
+      allow create: if isTeamLeader() && sameOrg(request.resource.data.organizationId);
+      allow update: if isTeamLeader() && sameOrg(resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Reports (read-only aggregates) ──────────────────────────────────────
+
+    match /reports/{reportId} {
+      allow read: if isTeamLeader() && sameOrg(resource.data.organizationId);
+      allow write: if isAdmin();
+    }
+  }
+}

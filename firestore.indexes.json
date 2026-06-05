@@ -1,0 +1,136 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "attendanceSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "weekString", "order": "ASCENDING"},
+        {"fieldPath": "category", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "attendanceSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "weekString", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "attendanceRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "sessionId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "attendanceRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "weekString", "order": "ASCENDING"},
+        {"fieldPath": "devoteeTeamId", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "attendanceRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "dateString", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "attendanceRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "devoteeTeamId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "dateString", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "callingLists",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "weekString", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "callingLists",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "assignedTo", "order": "ASCENDING"},
+        {"fieldPath": "weekStartDate", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "callRecords",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "callingListId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "followUps",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "followUps",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "devoteeTeamId", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "devotees",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "fullNameLower", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "devotees",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "primaryCategory", "order": "ASCENDING"},
+        {"fieldPath": "fullNameLower", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "devotees",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "fullNameLower", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organizationId", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"}
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
