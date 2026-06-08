@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p android/gradle/wrapper
           curl -fsSL --retry 6 --retry-delay 8 --retry-all-errors \
-            "https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar" \
+            "https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradle/wrapper/gradle-wrapper.jar" \
             -o android/gradle/wrapper/gradle-wrapper.jar
 
       - name: Decode google-services.json
@@ -56,12 +56,12 @@ jobs:
         run: |
           mkdir -p "$HOME/gradle-dist"
           curl -fSL --retry 10 --retry-delay 10 --retry-all-errors \
-            "https://services.gradle.org/distributions/gradle-8.6-bin.zip" \
-            -o "$HOME/gradle-dist/gradle-8.6-bin.zip"
+            "https://services.gradle.org/distributions/gradle-8.7-bin.zip" \
+            -o "$HOME/gradle-dist/gradle-8.7-bin.zip"
           cat > android/gradle/wrapper/gradle-wrapper.properties <<EOF
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=file\\://$HOME/gradle-dist/gradle-8.6-bin.zip
+          distributionUrl=file\\://$HOME/gradle-dist/gradle-8.7-bin.zip
           networkTimeout=10000
           validateDistributionUrl=true
           zipStoreBase=GRADLE_USER_HOME
