@@ -52,6 +52,23 @@ jobs:
             -keypass PrabhupadAshraya2024 \
             -dname "CN=PrabhupadAshraya, OU=ISKCON, O=PrabhupadAshraya, L=India, ST=India, C=IN"
 
+      - name: Pre-download Gradle distribution (avoids flaky CDN during build)
+        run: |
+          mkdir -p "$HOME/gradle-dist"
+          curl -fSL --retry 10 --retry-delay 10 --retry-all-errors \
+            "https://services.gradle.org/distributions/gradle-8.6-bin.zip" \
+            -o "$HOME/gradle-dist/gradle-8.6-bin.zip"
+          cat > android/gradle/wrapper/gradle-wrapper.properties <<EOF
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=file\\://$HOME/gradle-dist/gradle-8.6-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+          cat android/gradle/wrapper/gradle-wrapper.properties
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
