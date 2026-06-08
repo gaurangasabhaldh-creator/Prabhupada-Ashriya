@@ -29,9 +29,12 @@ jobs:
       - name: Install npm dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Generate Gradle Wrapper
-        working-directory: android
-        run: gradle wrapper --gradle-version 8.6 --distribution-type bin
+      - name: Download Gradle Wrapper JAR
+        run: |
+          mkdir -p android/gradle/wrapper
+          curl -fsSL --retry 6 --retry-delay 8 --retry-all-errors \
+            "https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar" \
+            -o android/gradle/wrapper/gradle-wrapper.jar
 
       - name: Decode google-services.json
         run: |
