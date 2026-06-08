@@ -10,7 +10,7 @@ react {
 android {
     ndkVersion "26.1.10909125"
     buildToolsVersion "34.0.0"
-    compileSdkVersion 34
+    compileSdk 34
     namespace "com.prabhupadashraya"
 
     defaultConfig {
@@ -56,3 +56,5 @@ dependencies {
     implementation platform("com.google.firebase:firebase-bom:33.1.0")
     implementation("com.google.firebase:firebase-analytics")
 }
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
