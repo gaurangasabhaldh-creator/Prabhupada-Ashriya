@@ -75,7 +75,11 @@ jobs:
       - name: Build Release APK
         working-directory: android
         run: |
-          for attempt in 1 2 3 4; do
+          if ./gradlew assembleRelease --no-daemon --stacktrace; then
+            exit 0
+          fi
+          echo "First attempt failed with stacktrace above, retrying without stacktrace..."
+          for attempt in 2 3 4; do
             echo "Build attempt $attempt..."
             if ./gradlew assembleRelease --no-daemon; then
               exit 0
