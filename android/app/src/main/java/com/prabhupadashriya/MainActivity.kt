@@ -1,4 +1,4 @@
-package com.prabhupadashraya
+package com.prabhupadashriya
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
