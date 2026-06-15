@@ -40,6 +40,16 @@ jobs:
         run: |
           echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
 
+      - name: Verify google-services.json
+        run: |
+          echo "File size in bytes:"
+          wc -c android/app/google-services.json
+          echo "Package names found inside the file:"
+          grep -o '"package_name": *"[^"]*"' android/app/google-services.json || echo "NO package_name FIELD FOUND - FILE IS BROKEN"
+          echo "First 200 characters of the file:"
+          head -c 200 android/app/google-services.json
+          echo ""
+
       - name: Generate release keystore
         run: |
           keytool -genkeypair -v \
