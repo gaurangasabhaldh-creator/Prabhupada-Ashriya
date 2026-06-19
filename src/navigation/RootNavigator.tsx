@@ -9,7 +9,7 @@ import {
   onNotificationOpenedApp,
   getInitialNotification,
 } from '@services/firebase/fcm.service';
-import {getUserDocument, updateLastLogin, updateFcmToken} from '@services/firestore/users.repository';
+import {getUserDocument, createUserDocument, updateLastLogin, updateFcmToken} from '@services/firestore/users.repository';
 import {useUIStore} from '@store/ui.store';
 import AuthNavigator from './AuthNavigator';
 import AppNavigator from './AppNavigator';
@@ -29,7 +29,22 @@ export default function RootNavigator() {
     const unsubscribe = onAuthStateChanged(async firebaseUser => {
       if (firebaseUser) {
         try {
-          const userDoc = await getUserDocument(firebaseUser.uid);
+          let userDoc = await getUserDocument(firebaseUser.uid);
+          if (!userDoc) {
+            await createUserDocument(firebaseUser.uid, {
+              email: firebaseUser.email ?? '',
+              displayName: firebaseUser.displayName ?? firebaseUser.email?.split('@')[0] ?? 'User',
+              photoURL: firebaseUser.photoURL ?? null,
+              role: 'volunteer',
+              organizationId: 'default',
+              teamIds: [],
+              callingListId: null,
+              fcmToken: null,
+              isActive: true,
+              requiresPasswordChange: false,
+            });
+            userDoc = await getUserDocument(firebaseUser.uid);
+          }
           if (userDoc) {
             updateLastLogin(firebaseUser.uid).catch(() => null);
             getFCMToken().then(token => {
@@ -39,7 +54,8 @@ export default function RootNavigator() {
           } else {
             setUser(null);
           }
-        } catch {
+        } catch (err) {
+          console.error('[Auth] Failed to load user profile:', err);
           setUser(null);
         }
       } else {
