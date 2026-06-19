@@ -3,6 +3,7 @@
 
 export const AUTH_ROUTES = {
   LOGIN: 'Login',
+  SIGNUP: 'Signup',
   FORGOT_PASSWORD: 'ForgotPassword',
   CHANGE_PASSWORD: 'ChangePassword',
 } as const;

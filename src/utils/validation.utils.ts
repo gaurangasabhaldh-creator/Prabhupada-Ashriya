@@ -41,6 +41,19 @@ export const changePasswordSchema = z
     path: ['confirmPassword'],
   });
 
+export const signupSchema = z
+  .object({
+    email: z.string().email('Enter a valid email'),
+    password: zPassword,
+    confirmPassword: z.string(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export type SignupFormData = z.infer<typeof signupSchema>;
+
 // ─── Devotee schemas ──────────────────────────────────────────────────────────
 
 export const devoteeBasicInfoSchema = z.object({

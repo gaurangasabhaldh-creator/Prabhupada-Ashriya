@@ -10,6 +10,14 @@ export const signIn = async (
   return user;
 };
 
+export const signUp = async (
+  email: string,
+  password: string,
+): Promise<FirebaseUser> => {
+  const {user} = await auth().createUserWithEmailAndPassword(email, password);
+  return user;
+};
+
 export const signOut = async (): Promise<void> => {
   await auth().signOut();
 };

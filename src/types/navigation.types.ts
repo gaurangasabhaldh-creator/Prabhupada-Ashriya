@@ -7,6 +7,7 @@ import {DrawerScreenProps} from '@react-navigation/drawer';
 
 export type AuthStackParamList = {
   Login: undefined;
+  Signup: undefined;
   ForgotPassword: undefined;
   ChangePassword: undefined;
 };
