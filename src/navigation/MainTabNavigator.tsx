@@ -1,4 +1,5 @@
 import React from 'react';
+import {View, Platform} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MainTabParamList} from '@mytypes/navigation.types';
 import {TAB_ROUTES} from '@constants/routes';
@@ -9,7 +10,6 @@ import CallingStack from './stacks/CallingStack';
 import CareStack from './stacks/CareStack';
 import ProfilesStack from './stacks/ProfilesStack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {Platform} from 'react-native';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -27,30 +27,47 @@ export default function MainTabNavigator() {
       screenOptions={({route}) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: COLORS.outlineVariant,
-          borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 72,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 12,
-          paddingTop: 8,
-          elevation: 12,
+          backgroundColor: '#1E1E35',
+          borderTopWidth: 0,
+          height: Platform.OS === 'ios' ? 90 : 75,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 14,
+          paddingTop: 10,
+          elevation: 20,
           shadowColor: '#000',
-          shadowOffset: {width: 0, height: -3},
-          shadowOpacity: 0.1,
-          shadowRadius: 6,
+          shadowOffset: {width: 0, height: -4},
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
         },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.onSurfaceVariant,
+        tabBarActiveTintColor: '#FF8F00',
+        tabBarInactiveTintColor: '#7A7A8E',
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '700',
           letterSpacing: 0.3,
-          marginTop: 2,
+          marginTop: 4,
         },
-        tabBarIcon: ({focused, color, size}) => {
+        tabBarIcon: ({focused, color}) => {
           const icons = TAB_ICONS[route.name];
           const iconName = focused ? icons.focused : icons.unfocused;
-          return <Icon name={iconName} size={24} color={color} />;
+          if (focused) {
+            return (
+              <View style={{
+                backgroundColor: 'rgba(255,143,0,0.15)',
+                borderRadius: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 6,
+              }}>
+                <Icon name={iconName} size={24} color={color} />
+              </View>
+            );
+          }
+          return <Icon name={iconName} size={22} color={color} />;
         },
       })}>
       <Tab.Screen
