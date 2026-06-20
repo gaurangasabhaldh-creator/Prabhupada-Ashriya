@@ -1,10 +1,9 @@
 import React from 'react';
 import {View, TouchableOpacity, StyleSheet} from 'react-native';
 import {Text} from '@components/common/Typography/Text';
-import {Icon} from '@components/common/Icon/Icon';
-import {COLORS} from '@constants/colors';
 import {BORDER_RADIUS, SPACING, HIT_SLOP} from '@constants/spacing';
 import {formatDate, addDays, subDays, isToday} from '@utils/date.utils';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface Props {
   date: Date;
@@ -21,12 +20,12 @@ export const DateNavigator: React.FC<Props> = ({date, onChange}) => {
         hitSlop={HIT_SLOP}
         accessibilityLabel="Previous day"
         style={styles.arrow}>
-        <Icon name="chevron_left" size={22} color="onSurfaceVariant" />
+        <Icon name="chevron-left" size={22} color="#B0A89A" />
       </TouchableOpacity>
 
       <View style={styles.dateDisplay}>
-        <Icon name="calendar_today" size={16} color="primary" />
-        <Text variant="title-md" color="onSurface" style={{marginLeft: SPACING.xs}}>
+        <Icon name="calendar" size={16} color="#FF8F00" />
+        <Text variant="title-md" style={{marginLeft: SPACING.xs, color: '#F5F0E8'}}>
           {atToday ? 'Today' : formatDate(date)}
         </Text>
       </View>
@@ -37,7 +36,7 @@ export const DateNavigator: React.FC<Props> = ({date, onChange}) => {
         disabled={atToday}
         accessibilityLabel="Next day"
         style={[styles.arrow, atToday && {opacity: 0.3}]}>
-        <Icon name="chevron_right" size={22} color="onSurfaceVariant" />
+        <Icon name="chevron-right" size={22} color="#B0A89A" />
       </TouchableOpacity>
     </View>
   );
@@ -48,10 +47,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.surfaceContainerLow,
+    backgroundColor: '#25253E',
     borderRadius: BORDER_RADIUS.xl,
     borderWidth: 1,
-    borderColor: COLORS.outlineVariant,
+    borderColor: '#353555',
     overflow: 'hidden',
   },
   arrow: {

@@ -1,15 +1,13 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import {View, ScrollView, StyleSheet, RefreshControl} from 'react-native';
+import {View, ScrollView, StyleSheet, RefreshControl, TouchableOpacity, TextInput} from 'react-native';
 import {FlashList} from '@shopify/flash-list';
 import {DateNavigator} from '@components/attendance/DateNavigator';
 import {AttendanceStatsBar} from '@components/attendance/AttendanceStatsBar';
 import {DevoteeAttendanceRow} from '@components/attendance/DevoteeAttendanceRow';
 import {SessionLockBanner} from '@components/attendance/SessionLockBanner';
-import {SearchInput} from '@components/common/Input/SearchInput';
 import {Chip} from '@components/common/Chip/Chip';
 import {Button} from '@components/common/Button/Button';
 import {FAB} from '@components/common/Button/FAB';
-import {EmptyState} from '@components/common/EmptyState/EmptyState';
 import {ListSkeleton} from '@components/common/LoadingSkeleton/ListSkeleton';
 import {Text} from '@components/common/Typography/Text';
 import {useAttendanceStore} from '@store/attendance.store';
@@ -23,10 +21,11 @@ import {useDevotees} from '@hooks/devotees/useDevotees';
 import {useAuth} from '@hooks/auth/useAuth';
 import {DevoteeDocument} from '@mytypes/devotee.types';
 import {AttendanceStatus, ATTENDANCE_STATUS} from '@constants/attendance';
-import {ALL_CATEGORIES, CATEGORY_LABELS, DevoteeCategory} from '@constants/categories';
+import {ALL_CATEGORIES, CATEGORY_LABELS} from '@constants/categories';
 import {COLORS} from '@constants/colors';
-import {SPACING} from '@constants/spacing';
-import {toDateString} from '@utils/date.utils';
+import {SPACING, BORDER_RADIUS} from '@constants/spacing';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import LinearGradient from 'react-native-linear-gradient';
 
 export default function LiveAttendanceTab() {
   const {selectedDate, selectedCategory, setSelectedDate, setSelectedCategory, pendingMarks, isDirty} =
@@ -35,16 +34,8 @@ export default function LiveAttendanceTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [teamFilter, setTeamFilter] = useState<string>('');
 
-  // Session
-  const {data: session, isLoading: sessionLoading} = useAttendanceSession(
-    selectedDate,
-    selectedCategory,
-  );
-
-  // Records (real-time)
+  const {data: session, isLoading: sessionLoading} = useAttendanceSession(selectedDate, selectedCategory);
   const {statusMap} = useAttendanceRecords(session?.id ?? null);
-
-  // All devotees (source of truth for the list)
   const {data: devoteePages, isLoading: devoteesLoading, refetch, isRefetching} = useDevotees({
     teamId: teamFilter || undefined,
   });
@@ -54,21 +45,15 @@ export default function LiveAttendanceTab() {
     [devoteePages],
   );
 
-  // Filtered devotees
   const filteredDevotees = useMemo(() => {
     const term = searchTerm.toLowerCase();
     if (!term) return allDevotees;
     return allDevotees.filter(
-      d =>
-        d.fullName.toLowerCase().includes(term) ||
-        d.mobileNumber.includes(term),
+      d => d.fullName.toLowerCase().includes(term) || d.mobileNumber.includes(term),
     );
   }, [allDevotees, searchTerm]);
 
-  // Stats (real stats from records + pending)
   const stats = useAttendanceStats(session?.id ?? null, allDevotees.length);
-
-  // Mutations
   const {mark} = useMarkAttendance();
   const {markAll} = useBatchMarkAttendance();
   const saveMutation = useSaveAttendance();
@@ -108,77 +93,120 @@ export default function LiveAttendanceTab() {
 
   return (
     <View style={styles.container}>
-      {/* Date nav + category filter */}
+      {/* Date & Category */}
       <View style={styles.controls}>
         <DateNavigator date={selectedDate} onChange={setSelectedDate} />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categories}>
-          {ALL_CATEGORIES.map(cat => (
-            <Chip
-              key={cat}
-              label={CATEGORY_LABELS[cat]}
-              selected={selectedCategory === cat}
-              onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-            />
-          ))}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categories}>
+          {ALL_CATEGORIES.map(cat => {
+            const selected = selectedCategory === cat;
+            return (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.categoryChip, selected && styles.categoryChipActive]}
+                onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                activeOpacity={0.7}>
+                {selected ? (
+                  <LinearGradient
+                    colors={['#FF8F00', '#E65100']}
+                    style={styles.categoryGradient}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 0}}>
+                    <Text style={styles.categoryTextActive}>{CATEGORY_LABELS[cat]}</Text>
+                  </LinearGradient>
+                ) : (
+                  <Text style={styles.categoryText}>{CATEGORY_LABELS[cat]}</Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
       {!selectedCategory ? (
-        <View style={styles.selectPrompt}>
-          <Text variant="body-md" color="onSurfaceVariant" align="center">
-            Select a category above to start marking attendance
-          </Text>
+        <View style={styles.emptyState}>
+          <View style={styles.emptyIconWrap}>
+            <Icon name="calendar-check" size={48} color="#FF8F00" />
+          </View>
+          <Text style={styles.emptyTitle}>Select a Team to Start</Text>
+          <Text style={styles.emptySubtitle}>Choose a category above to view devotees and mark attendance live</Text>
         </View>
       ) : (
         <>
-          {/* Stats */}
-          <AttendanceStatsBar
-            total={stats.total}
-            present={stats.present}
-            absent={stats.absent}
-            excused={stats.excused}
-          />
+          {/* Stats Cards */}
+          <View style={styles.statsRow}>
+            <View style={[styles.miniStatCard, {borderLeftColor: '#D4AF37'}]}>
+              <Icon name="account-group" size={16} color="#D4AF37" />
+              <Text style={styles.miniStatValue}>{stats.total}</Text>
+              <Text style={styles.miniStatLabel}>Total</Text>
+            </View>
+            <View style={[styles.miniStatCard, {borderLeftColor: '#4CAF50'}]}>
+              <Icon name="check-circle" size={16} color="#4CAF50" />
+              <Text style={styles.miniStatValue}>{stats.present}</Text>
+              <Text style={styles.miniStatLabel}>Present</Text>
+            </View>
+            <View style={[styles.miniStatCard, {borderLeftColor: '#FF5252'}]}>
+              <Icon name="close-circle" size={16} color="#FF5252" />
+              <Text style={styles.miniStatValue}>{stats.absent}</Text>
+              <Text style={styles.miniStatLabel}>Absent</Text>
+            </View>
+            <View style={[styles.miniStatCard, {borderLeftColor: '#6A1B9A'}]}>
+              <Icon name="chart-line" size={16} color="#6A1B9A" />
+              <Text style={styles.miniStatValue}>{stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0}%</Text>
+              <Text style={styles.miniStatLabel}>Rate</Text>
+            </View>
+          </View>
 
           {/* Search */}
           <View style={styles.searchRow}>
-            <SearchInput
-              placeholder="Search devotees..."
-              onChangeText={setSearchTerm}
-            />
+            <View style={styles.searchContainer}>
+              <Icon name="magnify" size={20} color="#B0A89A" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by name or phone..."
+                placeholderTextColor="#6E6A62"
+                onChangeText={setSearchTerm}
+                value={searchTerm}
+                disableFullscreenUI={true}
+              />
+              {searchTerm.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchTerm('')}>
+                  <Icon name="close-circle" size={18} color="#6E6A62" />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
-          {/* Batch actions */}
+          {/* Batch Actions */}
           {!sessionLocked && (
             <View style={styles.batchRow}>
-              <Button
-                label="Mark All Present"
-                leftIcon="done_all"
-                variant="outline"
-                size="sm"
+              <TouchableOpacity
+                style={styles.batchBtn}
                 onPress={() => markAll(filteredDevotees, ATTENDANCE_STATUS.PRESENT)}
-              />
-              <Button
-                label="Mark All Absent"
-                leftIcon="close"
-                variant="outline"
-                size="sm"
+                activeOpacity={0.7}>
+                <Icon name="check-all" size={16} color="#4CAF50" />
+                <Text style={[styles.batchBtnText, {color: '#4CAF50'}]}>All Present</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.batchBtn}
                 onPress={() => markAll(filteredDevotees, ATTENDANCE_STATUS.ABSENT)}
-              />
+                activeOpacity={0.7}>
+                <Icon name="close" size={16} color="#FF5252" />
+                <Text style={[styles.batchBtnText, {color: '#FF5252'}]}>All Absent</Text>
+              </TouchableOpacity>
             </View>
           )}
 
           {sessionLocked && <SessionLockBanner />}
 
-          {/* List */}
+          {/* Devotee List */}
           {filteredDevotees.length === 0 ? (
-            <EmptyState
-              icon="group"
-              title="No devotees found"
-              message={searchTerm ? `No results for "${searchTerm}"` : 'No devotees in this category.'}
-            />
+            <View style={styles.emptyState}>
+              <Icon name="account-search" size={40} color="#6E6A62" />
+              <Text style={styles.emptyTitle}>No devotees found</Text>
+              <Text style={styles.emptySubtitle}>
+                {searchTerm ? `No results for "${searchTerm}"` : 'No devotees in this category'}
+              </Text>
+            </View>
           ) : (
             <FlashList
               data={filteredDevotees}
@@ -190,8 +218,8 @@ export default function LiveAttendanceTab() {
                 <RefreshControl
                   refreshing={isRefetching}
                   onRefresh={refetch}
-                  tintColor={COLORS.primary}
-                  colors={[COLORS.primary]}
+                  tintColor="#FF8F00"
+                  colors={['#FF8F00']}
                 />
               }
             />
@@ -215,26 +243,117 @@ export default function LiveAttendanceTab() {
 }
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: COLORS.background},
+  container: {flex: 1, backgroundColor: '#1A1A2E'},
   controls: {
-    paddingHorizontal: SPACING.marginMobile,
+    paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     paddingBottom: SPACING.sm,
     gap: SPACING.sm,
   },
   categories: {gap: SPACING.sm},
-  selectPrompt: {
+  categoryChip: {
+    borderRadius: BORDER_RADIUS.full,
+    overflow: 'hidden',
+  },
+  categoryChipActive: {},
+  categoryGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  categoryTextActive: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  categoryText: {
+    color: '#B0A89A',
+    fontSize: 13,
+    fontWeight: '600',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#25253E',
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: '#353555',
+    overflow: 'hidden',
+  },
+  // Stats
+  statsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  miniStatCard: {
+    flex: 1,
+    backgroundColor: '#25253E',
+    borderRadius: 12,
+    padding: SPACING.sm,
+    alignItems: 'center',
+    gap: 2,
+    borderLeftWidth: 3,
+    borderWidth: 1,
+    borderColor: '#353555',
+  },
+  miniStatValue: {color: '#F5F0E8', fontSize: 18, fontWeight: '800'},
+  miniStatLabel: {color: '#B0A89A', fontSize: 9, fontWeight: '600', letterSpacing: 0.3},
+  // Search
+  searchRow: {paddingHorizontal: SPACING.lg, marginBottom: SPACING.sm},
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#25253E',
+    borderRadius: BORDER_RADIUS.full,
+    paddingHorizontal: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#353555',
+    gap: SPACING.sm,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#F5F0E8',
+    fontSize: 14,
+    paddingVertical: 10,
+  },
+  // Batch
+  batchRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  batchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#25253E',
+    borderRadius: BORDER_RADIUS.full,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#353555',
+  },
+  batchBtnText: {fontSize: 12, fontWeight: '700'},
+  // Empty
+  emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.xl,
+    gap: SPACING.md,
   },
-  searchRow: {paddingHorizontal: SPACING.marginMobile, marginBottom: SPACING.sm},
-  batchRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    paddingHorizontal: SPACING.marginMobile,
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,143,0,0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: SPACING.sm,
   },
-  listContent: {paddingBottom: 120},
+  emptyTitle: {color: '#F5F0E8', fontSize: 18, fontWeight: '700'},
+  emptySubtitle: {color: '#B0A89A', fontSize: 13, textAlign: 'center', lineHeight: 20},
+  // List
+  listContent: {paddingBottom: 120, paddingHorizontal: SPACING.lg},
 });

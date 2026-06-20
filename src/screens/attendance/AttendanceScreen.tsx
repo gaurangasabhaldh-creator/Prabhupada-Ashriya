@@ -4,15 +4,17 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Animated,
   SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import {Text} from '@components/common/Typography/Text';
 import {OfflineBanner} from '@components/common/OfflineBanner/OfflineBanner';
 import {COLORS} from '@constants/colors';
-import {SPACING} from '@constants/spacing';
+import {SPACING, BORDER_RADIUS} from '@constants/spacing';
 import {useAuth} from '@hooks/auth/useAuth';
 import {ROLE_ATTENDANCE_TAB_ACCESS} from '@constants/roles';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import LinearGradient from 'react-native-linear-gradient';
 import LiveAttendanceTab from './tabs/LiveAttendanceTab';
 import AttendanceSheetTab from './tabs/AttendanceSheetTab';
 import LateComersTab from './tabs/LateComersTab';
@@ -22,13 +24,13 @@ import LeaderboardTab from './tabs/LeaderboardTab';
 import TrendsTab from './tabs/TrendsTab';
 
 const ALL_TABS = [
-  {id: 'live', label: 'Live Attendance'},
-  {id: 'sheet', label: 'Attendance Sheet'},
-  {id: 'late', label: 'Late Comers'},
-  {id: 'new', label: 'New Comers'},
-  {id: 'analysis', label: 'Analysis'},
-  {id: 'leaderboard', label: 'Leaderboard'},
-  {id: 'trends', label: 'Trends'},
+  {id: 'live', label: 'Live Attendance', icon: 'broadcast'},
+  {id: 'sheet', label: 'Sheet', icon: 'table'},
+  {id: 'late', label: 'Late Comers', icon: 'clock-alert-outline'},
+  {id: 'new', label: 'New Comers', icon: 'account-plus-outline'},
+  {id: 'analysis', label: 'Analysis', icon: 'chart-bar'},
+  {id: 'leaderboard', label: 'Leaderboard', icon: 'trophy-outline'},
+  {id: 'trends', label: 'Trends', icon: 'trending-up'},
 ] as const;
 
 type TabId = (typeof ALL_TABS)[number]['id'];
@@ -44,24 +46,27 @@ export default function AttendanceScreen() {
 
   const handleTabPress = useCallback((tabId: TabId, index: number) => {
     setActiveTab(tabId);
-    // Scroll tab into view
     tabScrollRef.current?.scrollTo({
-      x: Math.max(0, index * 120 - 60),
+      x: Math.max(0, index * 130 - 40),
       animated: true,
     });
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#1A1A2E" barStyle="light-content" />
       <OfflineBanner />
 
-      {/* Page header */}
+      {/* Premium Header */}
       <View style={styles.pageHeader}>
-        <Text variant="headline-md" color="secondary">Attendance Tracker</Text>
-        <Text variant="body-sm" color="onSurfaceVariant">Manage devotee presence</Text>
+        <View style={styles.headerRow}>
+          <Icon name="calendar-check" size={24} color="#FF8F00" />
+          <Text style={styles.headerTitle}>ATTENDANCE TRACKER</Text>
+        </View>
+        <Text style={styles.headerSubtitle}>Live Devotee Attendance Management</Text>
       </View>
 
-      {/* Scrollable tab bar */}
+      {/* Premium Tab Bar */}
       <View style={styles.tabBarWrapper}>
         <ScrollView
           ref={tabScrollRef}
@@ -74,26 +79,31 @@ export default function AttendanceScreen() {
               <TouchableOpacity
                 key={tab.id}
                 onPress={() => handleTabPress(tab.id, i)}
-                style={[styles.tab, active && styles.activeTab]}
+                activeOpacity={0.7}
                 accessibilityRole="tab"
                 accessibilityState={{selected: active}}>
-                <Text
-                  variant="label-lg"
-                  style={{
-                    color: active ? COLORS.primary : COLORS.onSurfaceVariant,
-                    fontWeight: active ? '700' : '600',
-                  }}>
-                  {tab.label}
-                </Text>
+                {active ? (
+                  <LinearGradient
+                    colors={['#FF8F00', '#E65100']}
+                    style={styles.tabActive}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 0}}>
+                    <Icon name={tab.icon} size={16} color="#FFFFFF" />
+                    <Text style={styles.tabActiveText}>{tab.label}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.tabInactive}>
+                    <Icon name={tab.icon} size={16} color="#B0A89A" />
+                    <Text style={styles.tabInactiveText}>{tab.label}</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             );
           })}
         </ScrollView>
-        {/* Right fade gradient hint */}
-        <View style={styles.fadeRight} pointerEvents="none" />
       </View>
 
-      {/* Tab content — only active tab rendered */}
+      {/* Tab Content */}
       <View style={styles.content}>
         {activeTab === 'live' && <LiveAttendanceTab />}
         {activeTab === 'sheet' && <AttendanceSheetTab />}
@@ -108,32 +118,73 @@ export default function AttendanceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: COLORS.background},
-  pageHeader: {paddingHorizontal: SPACING.marginMobile, paddingTop: SPACING.md, paddingBottom: SPACING.sm},
+  container: {flex: 1, backgroundColor: '#1A1A2E'},
+  pageHeader: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.md,
+    alignItems: 'center',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FF8F00',
+    letterSpacing: 1.5,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: '#B0A89A',
+    fontWeight: '500',
+  },
   tabBarWrapper: {
+    paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.outlineVariant,
-    backgroundColor: COLORS.background,
-    position: 'relative',
+    borderBottomColor: '#2D2D4A',
   },
-  tabBar: {paddingHorizontal: SPACING.marginMobile, gap: 0},
-  tab: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    marginBottom: -1,
+  tabBar: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+    alignItems: 'center',
   },
-  activeTab: {borderBottomColor: COLORS.primary},
-  fadeRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 32,
-    // gradient hint — visual only
-    backgroundColor: COLORS.background,
-    opacity: 0.7,
+  tabActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: BORDER_RADIUS.full,
+    elevation: 4,
+    shadowColor: '#FF8F00',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  tabActiveText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  tabInactive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: BORDER_RADIUS.full,
+    backgroundColor: '#25253E',
+    borderWidth: 1,
+    borderColor: '#353555',
+  },
+  tabInactiveText: {
+    color: '#B0A89A',
+    fontSize: 13,
+    fontWeight: '600',
   },
   content: {flex: 1},
 });
