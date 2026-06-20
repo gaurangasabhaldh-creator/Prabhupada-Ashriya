@@ -3,96 +3,80 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MainTabParamList} from '@mytypes/navigation.types';
 import {TAB_ROUTES} from '@constants/routes';
 import {COLORS} from '@constants/colors';
-import {TYPOGRAPHY} from '@constants/typography';
 import HomeStack from './stacks/HomeStack';
 import AttendanceStack from './stacks/AttendanceStack';
 import CallingStack from './stacks/CallingStack';
 import CareStack from './stacks/CareStack';
 import ProfilesStack from './stacks/ProfilesStack';
-import {Text} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Platform} from 'react-native';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TabIcon = ({name, focused}: {name: string; focused: boolean}) => (
-  <Text
-    style={{
-      fontFamily: 'MaterialSymbolsOutlined',
-      fontSize: 24,
-      color: focused ? COLORS.onPrimaryContainer : COLORS.onSurfaceVariant,
-    }}>
-    {name}
-  </Text>
-);
+const TAB_ICONS: Record<string, {focused: string; unfocused: string}> = {
+  [TAB_ROUTES.HOME_TAB]: {focused: 'home', unfocused: 'home-outline'},
+  [TAB_ROUTES.ATTENDANCE_TAB]: {focused: 'calendar-check', unfocused: 'calendar-check-outline'},
+  [TAB_ROUTES.CALLING_TAB]: {focused: 'phone', unfocused: 'phone-outline'},
+  [TAB_ROUTES.CARE_TAB]: {focused: 'heart', unfocused: 'heart-outline'},
+  [TAB_ROUTES.PROFILES_TAB]: {focused: 'account-group', unfocused: 'account-group-outline'},
+};
 
 export default function MainTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({route}) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: COLORS.surface,
+          backgroundColor: '#FFFFFF',
           borderTopColor: COLORS.outlineVariant,
-          borderTopWidth: 0.5,
-          height: 64,
-          paddingBottom: 8,
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 88 : 72,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+          paddingTop: 8,
+          elevation: 12,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: -3},
+          shadowOpacity: 0.1,
+          shadowRadius: 6,
         },
-        tabBarActiveTintColor: COLORS.onPrimaryContainer,
+        tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.onSurfaceVariant,
         tabBarLabelStyle: {
-          ...TYPOGRAPHY['label-md'],
+          fontSize: 11,
+          fontWeight: '700',
+          letterSpacing: 0.3,
           marginTop: 2,
         },
-        tabBarActiveBackgroundColor: 'transparent',
-      }}>
+        tabBarIcon: ({focused, color, size}) => {
+          const icons = TAB_ICONS[route.name];
+          const iconName = focused ? icons.focused : icons.unfocused;
+          return <Icon name={iconName} size={24} color={color} />;
+        },
+      })}>
       <Tab.Screen
         name={TAB_ROUTES.HOME_TAB}
         component={HomeStack}
-        options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({focused}) => (
-            <TabIcon name="home" focused={focused} />
-          ),
-        }}
+        options={{tabBarLabel: 'Home'}}
       />
       <Tab.Screen
         name={TAB_ROUTES.ATTENDANCE_TAB}
         component={AttendanceStack}
-        options={{
-          tabBarLabel: 'Attendance',
-          tabBarIcon: ({focused}) => (
-            <TabIcon name="event_available" focused={focused} />
-          ),
-        }}
+        options={{tabBarLabel: 'Attendance'}}
       />
       <Tab.Screen
         name={TAB_ROUTES.CALLING_TAB}
         component={CallingStack}
-        options={{
-          tabBarLabel: 'Calling',
-          tabBarIcon: ({focused}) => (
-            <TabIcon name="call" focused={focused} />
-          ),
-        }}
+        options={{tabBarLabel: 'Calling'}}
       />
       <Tab.Screen
         name={TAB_ROUTES.CARE_TAB}
         component={CareStack}
-        options={{
-          tabBarLabel: 'Care',
-          tabBarIcon: ({focused}) => (
-            <TabIcon name="volunteer_activism" focused={focused} />
-          ),
-        }}
+        options={{tabBarLabel: 'Care'}}
       />
       <Tab.Screen
         name={TAB_ROUTES.PROFILES_TAB}
         component={ProfilesStack}
-        options={{
-          tabBarLabel: 'Profiles',
-          tabBarIcon: ({focused}) => (
-            <TabIcon name="group" focused={focused} />
-          ),
-        }}
+        options={{tabBarLabel: 'Profiles'}}
       />
     </Tab.Navigator>
   );
